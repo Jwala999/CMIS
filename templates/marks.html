@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMIS - Student Marks</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5d5f6, #d0e7ff);
+            font-family: 'Segoe UI', sans-serif;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(0, 40, 100, 0.85);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-brand,
+        .nav-link {
+            color: #fff !important;
+            font-weight: 600;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #ffd700 !important;
+        }
+
+        .container {
+            margin-top: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .card-title {
+            font-weight: bold;
+        }
+
+        h2 {
+            font-weight: bold;
+            color: #002855;
+        }
+
+        .form-label {
+            font-weight: 500;
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 1px solid #ccc;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #004e92, #000428);
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #003d73, #000326);
+        }
+
+        .btn-outline-light {
+            border-radius: 10px;
+        }
+
+        #searchMarks {
+            border-radius: 12px;
+        }
+
+        .table thead {
+            background-color: #004080;
+            color: #fff;
+        }
+
+        .table td,
+        .table th {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+
+        .modal-content {
+            border-radius: 16px;
+        }
+
+        .highlight {
+            background-color: rgba(255, 200, 0, 0.2) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/">CMIS</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav me-auto">
+                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                    <a class="nav-link active" href="/marks">Marks</a>
+                    <a class="nav-link" href="/courses">Courses</a>
+                    <a class="nav-link" href="/fees">Fees</a>
+                </div>
+                <a href="/" class="btn btn-outline-light">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h2 class="mb-4"><i class="bi bi-pencil-square"></i> Student Marks Management</h2>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info alert-dismissible fade show">
+                    {% for message in messages %}
+                        {{ message }}<br>
+                    {% endfor %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Add Student Form -->
+        <div class="card mb-4 p-4">
+            <h5 class="card-title text-primary">➕ Add New Student</h5>
+            <form method="POST" action="/marks">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="name" class="form-label">Student Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="course_id" class="form-label">Course</label>
+                        <select class="form-select" id="course_id" name="course_id" required>
+                            <option disabled selected>Select a course</option>
+                            {% for course in courses %}
+                                <option value="{{ course[0] }}">{{ course[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Math Mark</label>
+                        <input type="number" class="form-control" name="math_mark" min="0" max="100" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">101 Mark</label>
+                        <input type="number" class="form-control" name="physics_mark" min="0" max="100" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">102 Mark</label>
+                        <input type="number" class="form-control" name="chemistry_mark" min="0" max="100" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-2">
+                    <i class="bi bi-plus-circle-fill"></i> Add Student
+                </button>
+            </form>
+        </div>
+
+        <!-- Student Table -->
+        <div class="card p-4">
+            <h5 class="card-title text-primary">📄 Student Records</h5>
+            <div class="input-group mb-3">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchMarks" class="form-control" placeholder="Search students by name or marks...">
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover" id="marksTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Course</th>
+                            <th>Math</th>
+                            <th>101</th>
+                            <th>102</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student[0] }}</td>
+                            <td>{{ student[1] }}</td>
+                            <td>{{ student[2] }}</td>
+                            <td>{{ student[3] or '-' }}</td>
+                            <td>{{ student[4] or '-' }}</td>
+                            <td>{{ student[5] or '-' }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                    data-student-id="{{ student[0] }}" data-student-name="{{ student[1] }}">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form method="POST" action="/marks" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete <strong id="studentName"></strong>?
+                    <input type="hidden" name="student_id" id="studentId">
+                    <input type="hidden" name="delete" value="true">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const studentId = button.getAttribute('data-student-id');
+            const studentName = button.getAttribute('data-student-name');
+            document.getElementById('studentId').value = studentId;
+            document.getElementById('studentName').innerText = studentName;
+        });
+
+        document.getElementById("searchMarks").addEventListener("keyup", function () {
+            const input = this.value.toLowerCase();
+            const rows = document.querySelectorAll("#marksTable tbody tr");
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? "" : "none";
+                row.classList.toggle("highlight", text.includes(input));
+            });
+        });
+    </script>
+</body>
+</html>
