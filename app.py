@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your_secret_key')  # Use a secure key in production
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'd7e6b1ed9ee6ba1fb1e89473509c2870')  # Use a secure key in production
 
 # Database connection setup
 def get_db_connection():
